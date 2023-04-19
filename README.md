@@ -3,11 +3,11 @@
 
 The goal of this project is to easily capture, organize and share learnings.
 For groups, wanting to share and maintain learnings, [DevRev](https://devrev.ai/)
-offers a mechanism,to create features and work items which can maintain
-TIL posts.
-Often, we learn concepts through Youtube videos and there is value in
-transacribing and maintaining a log for quick reference.
-Youtube videos can be transcribed using the YouTube Transcript API.
+offers a mechanism, to create [Issues](https://devrev.ai/docs/product/build) using the [DevRev works API](https://devrev.ai/docs/apis/methods#/operations/works-create) 
+which you can post learnings to.
+Often, we learn concepts through Youtube videos and want to transcribe and 
+maintain a log of our learnings for quick reference.
+Youtube videos can be transcribed using the [YouTube Transcript API](https://pypi.org/project/youtube-transcript-api/).
 
 ## Setup
 
