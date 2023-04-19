@@ -1,0 +1,4 @@
+# This project has been developed with Python 3.10.9
+# The following must be installed:
+# pip3 install youtube-transcript-api
+# pip3 install requests
