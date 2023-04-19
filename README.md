@@ -18,7 +18,7 @@ Follow steps listed [here](https://devrev.ai/docs/apis/auth) to fetch the
 Devrev Personal Access Token.
 
 Set the env variable `WWCODE_API_WORKSHOP_PAT` to your token value using,
-export WWCODE_API_WORKSHOP_PAT <Fetched PAT value>
+`export WWCODE_API_WORKSHOP_PAT <Fetched PAT value>`
 
 Please do not share your PAT with anyone else, as this prepresents you as a user ont he platform.
 
