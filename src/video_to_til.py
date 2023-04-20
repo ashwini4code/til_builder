@@ -39,7 +39,6 @@ def fetch_transcription(id):
 #       https://devrev.ai/docs/apis/methods#/operations/parts-list
 
 def list_parts(feat):
-    type_filter = "type=feature"
     url = base_url + "/parts.list"
     payload = json.dumps({
         "name": [feat]
@@ -61,11 +60,12 @@ def list_parts(feat):
 #       https://devrev.ai/docs/apis/methods#/operations/works-list
 
 
-def list_works(part_id):
-    url = base_url + "/works.list?applies_to_part=" + part_id
+def list_works(part_id, user_id):
+    owner_filter = "&owned_by=" + user_id
+    url = base_url + "/works.list?applies_to_part=" + part_id + owner_filter
     payload = {}
     try:
-        response = requests.get(url, headers=headers, params=payload)
+        response = requests.get(url, headers=headers, data=payload)
         response.raise_for_status()
         works_list = response.json()["works"]
         if works_list:
@@ -78,7 +78,7 @@ def list_works(part_id):
         print(f'Other error occurred: {err}')
 
 # Fetch your user ID.
-# Return Value: Your user ID
+# Return Value: Your user information
 # Corresponding API definition:
 #      https://devrev.ai/docs/apis/methods#/operations/dev-users-self
 
@@ -90,19 +90,21 @@ def dev_user_self():
         response = requests.request("GET", url, headers=headers, data=payload)
         response.raise_for_status()
         json_resp = response.json()
-        return json_resp["dev_user"]["id"]
+        return json_resp["dev_user"]
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
     except Exception as err:
         print(f'Other error occurred: {err}')
 
 
-def create_works(part_id):
+def create_works(part_id, feat, user_id, user_name):
     url = base_url + "/works.create"
-    id_list = [dev_user_self()]
+    #user_info = dev_user_self()
+    #user_name = user_info["full_name"]
+    issue_title = feat + " :TIL Log for - " + user_name
     if part_id != "":
-        payload = {"owned_by": id_list,
-                   "title": "Ashwini's TIL Log",
+        payload = {"owned_by": [user_id],
+                   "title": issue_title,
                    "applies_to_part": part_id,
                    "type": "issue",}
         try:
@@ -148,14 +150,16 @@ def main():
         feat = "Uncategorized"
     vid_list = str(sys.argv[1])
     vid_link = "https://www.youtube.com/watch?v=" + vid_list
+    user_id =  dev_user_self()["id"]
+    user_name =  dev_user_self()["full_name"]
     part_id = list_parts(feat)
     if not part_id:
         print(" Cannot find Part")
         return
-    work_id = list_works(part_id)
+    work_id = list_works(part_id, user_id)
     print("The work item updated is: " + work_id)
     if work_id == "":
-        work_id = create_works(part_id)
+        work_id = create_works(part_id, feat, user_id, user_name)
         print("created " + work_id)
     today = date.today()
     datestr = today.strftime("%m/%d/%y")
@@ -168,6 +172,5 @@ def main():
         til = til.encode('utf-8')[:16383].decode('utf-8', 'ignore')
     create_comment(work_id, til)
 
-16384
 if __name__ == "__main__":
     main()
