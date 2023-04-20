@@ -1,7 +1,13 @@
 # til_builder
 
 
+## Goal
+
 The goal of this project is to easily capture, organize and share learnings.
+
+<img width="1358" alt="til" src="https://user-images.githubusercontent.com/86735914/233455665-da76df20-b07f-4e55-a4db-356c1ae5470a.png">
+
+
 For groups, wanting to share and maintain learnings, [DevRev](https://devrev.ai/)
 offers a mechanism, to create [Issues](https://devrev.ai/docs/product/build) using the [DevRev works API](https://devrev.ai/docs/apis/methods#/operations/works-create)
 which you can post learnings to.
@@ -18,7 +24,7 @@ Follow steps listed [here](https://devrev.ai/docs/apis/auth) to fetch the
 Devrev Personal Access Token.
 
 Set the env variable `WWCODE_API_WORKSHOP_PAT` to your token value using,
-`export WWCODE_API_WORKSHOP_PAT <Fetched PAT value>`
+`export WWCODE_API_WORKSHOP_PAT=<Fetched PAT value>`
 
 Please do not share your PAT with anyone else, as this prepresents you as a user ont he platform.
 
