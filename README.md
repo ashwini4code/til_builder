@@ -32,6 +32,6 @@ Please do not share your PAT with anyone else, as this prepresents you as a user
 ## Usage
 
 ```
-python3 src/video_to_til.py <youtube_video_id> "DevRev Feature Name"
-
+python3 src/til.py <youtube_video_id> "DevRev Feature Name"
+Example: python3 src/til.py Xfmu5PEL5Y0 "API"
 ```
