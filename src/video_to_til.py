@@ -18,12 +18,13 @@ headers = {
 work_id = " "
 base_url = "https://api.devrev.ai"
 
+# Calculate length of a string in bytes.
+def textlen(s):
+    return len(s.encode('utf-8'))
+
 # Fetch the trancript of the youtube video, when the id
 # of the video is provided.
 # Reference: https://pypi.org/project/youtube-transcript-api/
-
-def textlen(s):
-    return len(s.encode('utf-8'))
 
 def fetch_transcription(id):
     transcript = YouTubeTranscriptApi.get_transcript(
@@ -37,12 +38,14 @@ def fetch_transcription(id):
 # Corresponding API definition:
 #       https://devrev.ai/docs/apis/methods#/operations/parts-list
 
-
-def list_parts():
-    url = base_url + "/parts.list?name=\"Learning Logs\"&type=capability"
-    payload = {}
+def list_parts(feat):
+    type_filter = "type=feature"
+    url = base_url + "/parts.list"
+    payload = json.dumps({
+        "name": [feat]
+    })
     try:
-        response = requests.get(url, headers=headers, params=payload)
+        response = requests.post(url, headers=headers, data=payload)
         response.raise_for_status()
         part_list = response.json()["parts"]
         if part_list:
@@ -94,16 +97,14 @@ def dev_user_self():
         print(f'Other error occurred: {err}')
 
 
-def create_works():
+def create_works(part_id):
     url = base_url + "/works.create"
     id_list = [dev_user_self()]
-    part_id = list_parts()
-    # Pick the first part to assign the issue to.
     if part_id != "":
         payload = {"owned_by": id_list,
-                   "title": "Ashwini's LLM TIL Log",
+                   "title": "Ashwini's TIL Log",
                    "applies_to_part": part_id,
-                   "type": "issue", }
+                   "type": "issue",}
         try:
             response = requests.request("POST", url, headers=headers, json=payload)
             response.raise_for_status()
@@ -134,22 +135,27 @@ def create_comment(work_id, til):
 
 
 def main():
-    if len(sys.argv) > 2:
-        print("Too many ids. Please provide one at a time")
+    if len(sys.argv) > 3:
+        print("Too many inputs. Please provide id and feature name")
         return
-    elif len(sys.argv) != 2:
+    elif len(sys.argv) < 2:
         print("video id not provided")
         return
+    elif len(sys.argv) == 3 :
+        feat = str(sys.argv[2])
+    else:
+        print("Feature not provided, setting deafult Uncategorized")
+        feat = "Uncategorized"
     vid_list = str(sys.argv[1])
     vid_link = "https://www.youtube.com/watch?v=" + vid_list
-    part_id = list_parts()
+    part_id = list_parts(feat)
     if not part_id:
-        print(" Cannot find Part[Learning Logs]")
+        print(" Cannot find Part")
         return
     work_id = list_works(part_id)
     print("The work item updated is: " + work_id)
     if work_id == "":
-        work_id = create_works()
+        work_id = create_works(part_id)
         print("created " + work_id)
     today = date.today()
     datestr = today.strftime("%m/%d/%y")
