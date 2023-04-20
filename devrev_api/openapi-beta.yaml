@@ -1,0 +1,2231 @@
+components:
+  responses:
+    bad-request:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-bad-request'
+      description: 400 Bad Request.
+    forbidden:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-forbidden'
+      description: 403 Forbidden.
+    internal-server-error:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-internal-server-error'
+      description: 500 Internal Server Error.
+    not-found:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-not-found'
+      description: 404 Not Found.
+    service-unavailable:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-service-unavailable'
+      description: 503 Service Unavailable.
+    too-many-requests:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-too-many-requests'
+      description: 429 Too Many Requests.
+      headers:
+        Retry-After:
+          schema:
+            description: Number of seconds to wait before retrying.
+            type: number
+    unauthorized:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-unauthorized'
+      description: 401 Unauthorized.
+  schemas:
+    artifact-summary:
+      allOf:
+      - $ref: '#/components/schemas/atom-base-summary'
+      title: artifact-summary
+    atom-base:
+      properties:
+        created_by:
+          $ref: '#/components/schemas/user-summary'
+        created_date:
+          description: Timestamp when the object was created.
+          format: date-time
+          type: string
+        display_id:
+          description: Human-readable object ID unique to the Dev organization.
+          type: string
+        id:
+          description: Globally unique object ID.
+          type: string
+        modified_by:
+          $ref: '#/components/schemas/user-summary'
+        modified_date:
+          description: Timestamp when the object was last modified.
+          format: date-time
+          type: string
+      required:
+      - id
+      title: atom-base
+      type: object
+    atom-base-summary:
+      properties:
+        display_id:
+          description: Human-readable object ID unique to the Dev organization.
+          type: string
+        id:
+          description: Globally unique object ID.
+          type: string
+      required:
+      - id
+      title: atom-base-summary
+      type: object
+    capability-summary:
+      allOf:
+      - $ref: '#/components/schemas/part-base-summary'
+      title: capability-summary
+    conversation:
+      allOf:
+      - $ref: '#/components/schemas/atom-base'
+      - properties:
+          description:
+            description: Description of the conversation object.
+            type: string
+          group:
+            $ref: '#/components/schemas/group-summary'
+          messages:
+            description: The latest messages on the conversation.
+            items:
+              $ref: '#/components/schemas/timeline-entry'
+            type: array
+          owned_by:
+            description: Owner IDs for the conversation.
+            items:
+              $ref: '#/components/schemas/user-summary'
+            type: array
+          stage:
+            $ref: '#/components/schemas/stage'
+          title:
+            description: Title of the conversation object.
+            type: string
+        type: object
+      title: conversation
+    conversation-summary:
+      allOf:
+      - $ref: '#/components/schemas/atom-base-summary'
+      - properties:
+          title:
+            description: Title of the conversation object.
+            type: string
+        type: object
+      title: conversation-summary
+    conversations-create-request:
+      description: The request to create a new conversation.
+      properties:
+        description:
+          description: Description for the conversation.
+          type: string
+        group:
+          description: The group that the conversation is associated with.
+          type: string
+        members:
+          description: The users in the conversation.
+          example:
+          - don:<partition>:identity:devo/<dev-org-id>:devu/<dev-user-id>
+          items:
+            type: string
+          type: array
+        messages:
+          description: Initial messages on the conversation.
+          items:
+            $ref: '#/components/schemas/conversations-create-request-message'
+          type: array
+        stage:
+          $ref: '#/components/schemas/stage-init'
+        tags:
+          description: Tags associated with the conversation.
+          items:
+            $ref: '#/components/schemas/set-tag-with-value'
+          type: array
+        title:
+          description: The title for the conversation.
+          type: string
+        type:
+          $ref: '#/components/schemas/conversations-create-request-type-value'
+      required:
+      - type
+      title: conversations-create-request
+      type: object
+    conversations-create-request-message:
+      properties:
+        artifacts:
+          description: The IDs of the artifacts to the message.
+          example:
+          - don:<partition>:core:devo/<dev-org-id>:artifact/<artifact-id>
+          items:
+            type: string
+          type: array
+        body:
+          description: The message's body.
+          type: string
+      title: conversations-create-request-message
+      type: object
+    conversations-create-request-type-value:
+      enum:
+      - support
+      type: string
+    conversations-create-response:
+      description: The response to creating a new conversation.
+      properties:
+        conversation:
+          $ref: '#/components/schemas/conversation'
+      required:
+      - conversation
+      title: conversations-create-response
+      type: object
+      x-go-name: ConversationsCreateResponseBody
+    conversations-delete-request:
+      description: The request to delete a conversation.
+      properties:
+        id:
+          description: The ID of the conversation to delete.
+          type: string
+      required:
+      - id
+      title: conversations-delete-request
+      type: object
+    conversations-delete-response:
+      description: The response for deleting a conversation.
+      title: conversations-delete-response
+      type: object
+      x-go-name: ConversationsDeleteResponseBody
+    conversations-export-response:
+      properties:
+        conversations:
+          description: The resulting collection of conversation items.
+          items:
+            $ref: '#/components/schemas/conversation'
+          type: array
+      required:
+      - conversations
+      title: conversations-export-response
+      type: object
+      x-go-name: ConversationsExportResponseBody
+    conversations-get-response:
+      description: The response to getting a conversation's information.
+      properties:
+        conversation:
+          $ref: '#/components/schemas/conversation'
+      required:
+      - conversation
+      title: conversations-get-response
+      type: object
+      x-go-name: ConversationsGetResponseBody
+    conversations-list-response:
+      description: The response to listing the conversations.
+      properties:
+        conversations:
+          description: The list of conversations.
+          items:
+            $ref: '#/components/schemas/conversation'
+          type: array
+        next_cursor:
+          description: |
+            The cursor used to iterate subsequent results in accordance to the
+            sort order. If not set, then no later elements exist.
+          type: string
+        prev_cursor:
+          description: |
+            The cursor used to iterate preceding results in accordance to the
+            sort order. If not set, then no prior elements exist.
+          type: string
+      required:
+      - conversations
+      title: conversations-list-response
+      type: object
+      x-go-name: ConversationsListResponseBody
+    conversations-update-request:
+      description: The request to update a conversation.
+      properties:
+        applies_to_parts:
+          $ref: '#/components/schemas/conversations-update-request-applies-to-parts'
+        description:
+          description: The updated description for the conversation.
+          type: string
+        group:
+          description: The group that the conversation is associated with.
+          type: string
+        id:
+          description: The ID of the conversation to update.
+          type: string
+        stage:
+          $ref: '#/components/schemas/stage-update'
+        status:
+          description: The updated status of the conversation.
+          type: string
+        title:
+          description: The updated title of the conversation.
+          type: string
+      required:
+      - id
+      title: conversations-update-request
+      type: object
+    conversations-update-request-applies-to-parts:
+      properties:
+        set:
+          description: Updates the parts that the conversation applies to.
+          example:
+          - don:<partition>:core:devo/<dev-org-id>:<part-type>/<part-id>
+          items:
+            type: string
+          type: array
+      title: conversations-update-request-applies-to-parts
+      type: object
+    conversations-update-response:
+      description: The response for updating a conversation.
+      properties:
+        conversation:
+          $ref: '#/components/schemas/conversation'
+      required:
+      - conversation
+      title: conversations-update-response
+      type: object
+      x-go-name: ConversationsUpdateResponseBody
+    dev-user-summary:
+      allOf:
+      - $ref: '#/components/schemas/user-base-summary'
+      title: dev-user-summary
+    enhancement-summary:
+      allOf:
+      - $ref: '#/components/schemas/part-base-summary'
+      title: enhancement-summary
+    error-bad-request:
+      allOf:
+      - $ref: '#/components/schemas/error-base'
+      - discriminator:
+          mapping:
+            bad_request: '#/components/schemas/error-bad-request-bad-request'
+            invalid_enum_value: '#/components/schemas/error-bad-request-invalid-enum-value'
+            missing_required_field: '#/components/schemas/error-bad-request-missing-required-field'
+            parse_error: '#/components/schemas/error-bad-request-parse-error'
+            value_not_permitted: '#/components/schemas/error-bad-request-value-not-permitted'
+          propertyName: type
+        oneOf:
+        - $ref: '#/components/schemas/error-bad-request-bad-request'
+        - $ref: '#/components/schemas/error-bad-request-invalid-enum-value'
+        - $ref: '#/components/schemas/error-bad-request-missing-required-field'
+        - $ref: '#/components/schemas/error-bad-request-parse-error'
+        - $ref: '#/components/schemas/error-bad-request-value-not-permitted'
+        properties:
+          type:
+            $ref: '#/components/schemas/error-bad-request-type'
+        required:
+        - type
+        type: object
+      title: error-bad-request
+    error-bad-request-bad-request:
+      title: error-bad-request-bad-request
+      type: object
+    error-bad-request-invalid-enum-value:
+      properties:
+        allowed_values:
+          description: The allowed values for the field.
+          items:
+            type: string
+          type: array
+        field_name:
+          description: The field whose enum value is invalid.
+          type: string
+        value:
+          description: The value that was received.
+          type: string
+      required:
+      - allowed_values
+      - field_name
+      - value
+      title: error-bad-request-invalid-enum-value
+      type: object
+    error-bad-request-missing-required-field:
+      properties:
+        field_name:
+          description: The missing field's name.
+          type: string
+      required:
+      - field_name
+      title: error-bad-request-missing-required-field
+      type: object
+    error-bad-request-parse-error:
+      title: error-bad-request-parse-error
+      type: object
+    error-bad-request-type:
+      enum:
+      - bad_request
+      - invalid_enum_value
+      - missing_required_field
+      - parse_error
+      - value_not_permitted
+      type: string
+    error-bad-request-value-not-permitted:
+      properties:
+        field_name:
+          description: The field whose value is not permitted.
+          type: string
+        reason:
+          description: The reason the value isn't permitted.
+          type: string
+      required:
+      - field_name
+      title: error-bad-request-value-not-permitted
+      type: object
+    error-base:
+      properties:
+        message:
+          description: The message associated with the error.
+          type: string
+      title: error-base
+      type: object
+    error-forbidden:
+      allOf:
+      - $ref: '#/components/schemas/error-base'
+      - discriminator:
+          mapping:
+            forbidden: '#/components/schemas/error-forbidden-forbidden'
+          propertyName: type
+        oneOf:
+        - $ref: '#/components/schemas/error-forbidden-forbidden'
+        properties:
+          type:
+            $ref: '#/components/schemas/error-forbidden-type'
+        required:
+        - type
+        type: object
+      title: error-forbidden
+    error-forbidden-forbidden:
+      title: error-forbidden-forbidden
+      type: object
+    error-forbidden-type:
+      enum:
+      - forbidden
+      type: string
+    error-internal-server-error:
+      allOf:
+      - $ref: '#/components/schemas/error-base'
+      - discriminator:
+          mapping:
+            internal_error: '#/components/schemas/error-internal-server-error-internal-error'
+          propertyName: type
+        oneOf:
+        - $ref: '#/components/schemas/error-internal-server-error-internal-error'
+        properties:
+          reference_id:
+            description: |
+              A unique ID that's generated for the error that can be used for
+              inquiry.
+            type: string
+          type:
+            $ref: '#/components/schemas/error-internal-server-error-type'
+        required:
+        - type
+        type: object
+      title: error-internal-server-error
+    error-internal-server-error-internal-error:
+      title: error-internal-server-error-internal-error
+      type: object
+    error-internal-server-error-type:
+      enum:
+      - internal_error
+      type: string
+    error-not-found:
+      allOf:
+      - $ref: '#/components/schemas/error-base'
+      - discriminator:
+          mapping:
+            not_found: '#/components/schemas/error-not-found-not-found'
+          propertyName: type
+        oneOf:
+        - $ref: '#/components/schemas/error-not-found-not-found'
+        properties:
+          type:
+            $ref: '#/components/schemas/error-not-found-type'
+        required:
+        - type
+        type: object
+      title: error-not-found
+    error-not-found-not-found:
+      title: error-not-found-not-found
+      type: object
+    error-not-found-type:
+      enum:
+      - not_found
+      type: string
+    error-service-unavailable:
+      allOf:
+      - $ref: '#/components/schemas/error-base'
+      - discriminator:
+          mapping:
+            service_unavailable: '#/components/schemas/error-service-unavailable-service-unavailable'
+          propertyName: type
+        oneOf:
+        - $ref: '#/components/schemas/error-service-unavailable-service-unavailable'
+        properties:
+          type:
+            $ref: '#/components/schemas/error-service-unavailable-type'
+        required:
+        - type
+        type: object
+      title: error-service-unavailable
+    error-service-unavailable-service-unavailable:
+      title: error-service-unavailable-service-unavailable
+      type: object
+    error-service-unavailable-type:
+      enum:
+      - service_unavailable
+      type: string
+    error-too-many-requests:
+      allOf:
+      - $ref: '#/components/schemas/error-base'
+      - discriminator:
+          mapping:
+            too_many_requests: '#/components/schemas/error-too-many-requests-too-many-requests'
+          propertyName: type
+        oneOf:
+        - $ref: '#/components/schemas/error-too-many-requests-too-many-requests'
+        properties:
+          retry_after:
+            description: |
+              The number of seconds after which the client should retry.
+            format: int64
+            type: integer
+          type:
+            $ref: '#/components/schemas/error-too-many-requests-type'
+        required:
+        - type
+        type: object
+      title: error-too-many-requests
+    error-too-many-requests-too-many-requests:
+      title: error-too-many-requests-too-many-requests
+      type: object
+    error-too-many-requests-type:
+      enum:
+      - too_many_requests
+      type: string
+    error-unauthorized:
+      allOf:
+      - $ref: '#/components/schemas/error-base'
+      - discriminator:
+          mapping:
+            unauthenticated: '#/components/schemas/error-unauthorized-unauthenticated'
+          propertyName: type
+        oneOf:
+        - $ref: '#/components/schemas/error-unauthorized-unauthenticated'
+        properties:
+          type:
+            $ref: '#/components/schemas/error-unauthorized-type'
+        required:
+        - type
+        type: object
+      title: error-unauthorized
+    error-unauthorized-type:
+      enum:
+      - unauthenticated
+      type: string
+    error-unauthorized-unauthenticated:
+      title: error-unauthorized-unauthenticated
+      type: object
+    feature-summary:
+      allOf:
+      - $ref: '#/components/schemas/part-base-summary'
+      title: feature-summary
+    group-summary:
+      allOf:
+      - $ref: '#/components/schemas/atom-base-summary'
+      title: group-summary
+    issue-priority:
+      description: Priority of the work based upon impact and criticality.
+      enum:
+      - p0
+      - p1
+      - p2
+      - p3
+      type: string
+    issue-summary:
+      allOf:
+      - $ref: '#/components/schemas/work-base-summary'
+      - properties:
+          priority:
+            $ref: '#/components/schemas/issue-priority'
+        type: object
+      title: issue-summary
+    link:
+      allOf:
+      - $ref: '#/components/schemas/atom-base'
+      - properties:
+          link_type:
+            $ref: '#/components/schemas/link-type'
+          source:
+            $ref: '#/components/schemas/link-endpoint-summary'
+          target:
+            $ref: '#/components/schemas/link-endpoint-summary'
+        required:
+        - link_type
+        - source
+        - target
+        type: object
+      title: link
+    link-endpoint-summary:
+      discriminator:
+        mapping:
+          capability: '#/components/schemas/capability-summary'
+          conversation: '#/components/schemas/conversation-summary'
+          enhancement: '#/components/schemas/enhancement-summary'
+          feature: '#/components/schemas/feature-summary'
+          issue: '#/components/schemas/issue-summary'
+          product: '#/components/schemas/product-summary'
+          ticket: '#/components/schemas/ticket-summary'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/capability-summary'
+      - $ref: '#/components/schemas/conversation-summary'
+      - $ref: '#/components/schemas/enhancement-summary'
+      - $ref: '#/components/schemas/feature-summary'
+      - $ref: '#/components/schemas/issue-summary'
+      - $ref: '#/components/schemas/product-summary'
+      - $ref: '#/components/schemas/ticket-summary'
+      properties:
+        type:
+          $ref: '#/components/schemas/link-endpoint-type'
+      required:
+      - type
+      title: link-endpoint-summary
+      type: object
+    link-endpoint-type:
+      enum:
+      - capability
+      - conversation
+      - enhancement
+      - feature
+      - issue
+      - product
+      - ticket
+      type: string
+    link-rev-user-to-rev-org-request:
+      description: A request to link a rev user to a rev org.
+      properties:
+        rev_org_don:
+          description: The don of the rev org to link the rev user to.
+          example: don:<partition>:identity:devo/<dev-org-id>:revo/<rev-org-id>
+          type: string
+        user_don:
+          description: The don of the rev user to link.
+          type: string
+      required:
+      - rev_org_don
+      - user_don
+      title: link-rev-user-to-rev-org-request
+      type: object
+    link-rev-user-to-rev-org-response:
+      description: The response to link a rev user to a rev org.
+      properties:
+        rev_user:
+          $ref: '#/components/schemas/rev-user'
+      required:
+      - rev_user
+      title: link-rev-user-to-rev-org-response
+      type: object
+      x-go-name: LinkRevUserToRevOrgResponseBody
+    link-type:
+      description: Type of link used to define the relationship.
+      enum:
+      - developed_with
+      - imports
+      - is_dependent_on
+      - is_duplicate_of
+      - is_parent_of
+      - is_part_of
+      - is_related_to
+      - serves
+      type: string
+    links-create-request:
+      description: The request to create a new link.
+      properties:
+        link_type:
+          $ref: '#/components/schemas/link-type'
+        source:
+          description: The ID of the source object.
+          type: string
+        target:
+          description: The ID of the target object.
+          type: string
+      required:
+      - link_type
+      - source
+      - target
+      title: links-create-request
+      type: object
+    links-create-response:
+      description: The response to creating a new link.
+      properties:
+        link:
+          $ref: '#/components/schemas/link'
+      required:
+      - link
+      title: links-create-response
+      type: object
+      x-go-name: LinksCreateResponseBody
+    links-delete-request:
+      description: The request to delete a link.
+      properties:
+        id:
+          description: The ID of the link to delete.
+          type: string
+      required:
+      - id
+      title: links-delete-request
+      type: object
+    links-delete-response:
+      description: The response for deleting a link.
+      title: links-delete-response
+      type: object
+      x-go-name: LinksDeleteResponseBody
+    links-direction:
+      description: |
+        The direction of link, which can either be outbound such that the
+        object is the source of the link, otherwise inbound where the object is
+        the target of the link.
+      enum:
+      - is_source
+      - is_target
+      type: string
+    links-get-response:
+      description: The response to getting a link's information.
+      properties:
+        link:
+          $ref: '#/components/schemas/link'
+      required:
+      - link
+      title: links-get-response
+      type: object
+      x-go-name: LinksGetResponseBody
+    links-list-response:
+      description: The response to listing the links.
+      properties:
+        links:
+          description: The list of links.
+          items:
+            $ref: '#/components/schemas/link'
+          type: array
+        next_cursor:
+          description: |
+            The cursor used to iterate subsequent results in accordance to the
+            sort order. If not set, then no later elements exist.
+          type: string
+        prev_cursor:
+          description: |
+            The cursor used to iterate preceding results in accordance to the
+            sort order. If not set, then no prior elements exist.
+          type: string
+      required:
+      - links
+      title: links-list-response
+      type: object
+      x-go-name: LinksListResponseBody
+    list-mode:
+      description: |
+        The iteration mode to use. If "after", then entries after the provided
+        cursor will be returned, or if no cursor is provided, then from the
+        beginning. If "before", then entries before the provided cursor will be
+        returned, or if no cursor is provided, then from the end. Entries will
+        always be returned in the specified sort-by order.
+      enum:
+      - after
+      - before
+      type: string
+    org-base-summary:
+      allOf:
+      - $ref: '#/components/schemas/atom-base-summary'
+      - properties:
+          display_name:
+            description: Name of the Organization.
+            type: string
+        type: object
+      title: org-base-summary
+    org-summary:
+      discriminator:
+        mapping:
+          rev_org: '#/components/schemas/rev-org-summary'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/rev-org-summary'
+      properties:
+        type:
+          $ref: '#/components/schemas/org-type'
+      required:
+      - type
+      title: org-summary
+      type: object
+    org-type:
+      enum:
+      - rev_org
+      type: string
+    part-base-summary:
+      allOf:
+      - $ref: '#/components/schemas/atom-base-summary'
+      - properties:
+          name:
+            description: Name of the part.
+            type: string
+        required:
+        - name
+        type: object
+      title: part-base-summary
+    product-summary:
+      allOf:
+      - $ref: '#/components/schemas/part-base-summary'
+      title: product-summary
+    rev-org-summary:
+      allOf:
+      - $ref: '#/components/schemas/org-base-summary'
+      title: rev-org-summary
+    rev-user:
+      allOf:
+      - $ref: '#/components/schemas/user-base'
+      - properties:
+          description:
+            description: Description of the Rev user.
+            type: string
+          external_ref:
+            description: |
+              External ref is a mutable unique identifier for a user within the
+              Rev organization from your primary customer record. If none is
+              available, a good alternative is the email address/phone number
+              which could uniquely identify the user. If none is specified, a
+              system-generated identifier will be assigned to the user.
+            type: string
+          rev_org:
+            $ref: '#/components/schemas/org-summary'
+        type: object
+      title: rev-user
+    rev-user-summary:
+      allOf:
+      - $ref: '#/components/schemas/user-base-summary'
+      - properties:
+          external_ref:
+            description: |
+              External ref is a mutable unique identifier for a user within the
+              Rev organization from your primary customer record. If none is
+              available, a good alternative is the email address/phone number
+              which could uniquely identify the user. If none is specified, a
+              system-generated identifier will be assigned to the user.
+            type: string
+          rev_org:
+            $ref: '#/components/schemas/org-summary'
+        type: object
+      title: rev-user-summary
+    rev-users-create-request:
+      description: |
+        Request object to create a new Rev user for a Rev organization.
+      properties:
+        description:
+          description: Description of the Rev user.
+          type: string
+        display_name:
+          description: |
+            The user's display name. The name is non-unique and mutable.
+          type: string
+        email:
+          description: Email address of the Rev user.
+          type: string
+        external_ref:
+          description: |
+            External ref is a mutable unique identifier for a user within the
+            Dev organization from your primary customer record. If none is
+            available, a good alternative is the email address/phone number
+            which could uniquely identify the user. If none is specified, a
+            system-generated identifier will be assigned to the user.
+          type: string
+        phone_numbers:
+          description: Phone numbers of the Rev user.
+          items:
+            type: string
+          type: array
+        rev_org:
+          description: |
+            The ID of Rev organization for which a Rev user is to be created.
+          example: don:<partition>:identity:devo/<dev-org-id>:revo/<rev-org-id>
+          type: string
+      required:
+      - rev_org
+      title: rev-users-create-request
+      type: object
+    rev-users-create-response:
+      description: |
+        Response object for creating a new Rev user for Rev organization.
+      properties:
+        rev_user:
+          $ref: '#/components/schemas/rev-user'
+      required:
+      - rev_user
+      title: rev-users-create-response
+      type: object
+      x-go-name: RevUsersCreateResponseBody
+    rev-users-delete-request:
+      description: Request object to delete a Rev user.
+      properties:
+        id:
+          description: The ID of Rev user to delete.
+          type: string
+      required:
+      - id
+      title: rev-users-delete-request
+      type: object
+    rev-users-delete-response:
+      description: The response to deleting a Rev user of a Rev organization.
+      title: rev-users-delete-response
+      type: object
+      x-go-name: RevUsersDeleteResponseBody
+    rev-users-get-response:
+      description: The returned Rev user.
+      properties:
+        rev_user:
+          $ref: '#/components/schemas/rev-user'
+      required:
+      - rev_user
+      title: rev-users-get-response
+      type: object
+      x-go-name: RevUsersGetResponseBody
+    rev-users-list-response:
+      description: |
+        The response to listing all Rev users matching the filter criteria.
+      properties:
+        next_cursor:
+          description: |
+            The cursor used to iterate subsequent results in accordance to the
+            sort order. If not set, then no later elements exist.
+          type: string
+        prev_cursor:
+          description: |
+            The cursor used to iterate preceding results in accordance to the
+            sort order. If not set, then no prior elements exist.
+          type: string
+        rev_users:
+          description: List containing all the Rev users.
+          items:
+            $ref: '#/components/schemas/rev-user'
+          type: array
+      required:
+      - rev_users
+      title: rev-users-list-response
+      type: object
+      x-go-name: RevUsersListResponseBody
+    rev-users-update-request:
+      description: Request to update details of a Rev user.
+      properties:
+        description:
+          description: Updated description of the Rev user.
+          type: string
+        display_name:
+          description: Updated display name of the Rev user.
+          type: string
+        email:
+          description: Updated email address of the Rev user.
+          type: string
+        external_ref:
+          description: Updated external ref value of the Rev user.
+          type: string
+        id:
+          description: The ID of Rev user to update.
+          type: string
+      required:
+      - id
+      title: rev-users-update-request
+      type: object
+    rev-users-update-response:
+      description: Updated Rev user object.
+      properties:
+        rev_user:
+          $ref: '#/components/schemas/rev-user'
+      required:
+      - rev_user
+      title: rev-users-update-response
+      type: object
+      x-go-name: RevUsersUpdateResponseBody
+    set-tag-with-value:
+      properties:
+        id:
+          description: The ID of the tag.
+          example: don:<partition>:core:devo/<dev-org-id>:tag/<tag-id>
+          type: string
+        value:
+          description: |
+            The value for the object's association with the tag. If specified,
+            the value must be one that's specified in the tag's allowed values.
+          type: string
+      required:
+      - id
+      title: set-tag-with-value
+      type: object
+    stage:
+      description: Describes the current stage of a work item.
+      properties:
+        name:
+          description: Current stage name of the work item.
+          type: string
+      required:
+      - name
+      title: stage
+      type: object
+    stage-init:
+      description: Sets an object's initial stage.
+      properties:
+        name:
+          description: The name of the stage.
+          type: string
+      title: stage-init
+      type: object
+    stage-update:
+      description: Updates an object's stage.
+      properties:
+        name:
+          description: |
+            The updated name of the stage, otherwise unchanged if not set.
+          type: string
+      title: stage-update
+      type: object
+    sys-user:
+      allOf:
+      - $ref: '#/components/schemas/user-base'
+      title: sys-user
+    sys-user-summary:
+      allOf:
+      - $ref: '#/components/schemas/user-base-summary'
+      title: sys-user-summary
+    sys-users-list-response:
+      description: The response to listing the system users.
+      properties:
+        next_cursor:
+          description: |
+            The cursor used to iterate subsequent results in accordance to the
+            sort order. If not set, then no later elements exist.
+          type: string
+        prev_cursor:
+          description: |
+            The cursor used to iterate preceding results in accordance to the
+            sort order. If not set, then no prior elements exist.
+          type: string
+        sys_users:
+          description: The list of system users.
+          items:
+            $ref: '#/components/schemas/sys-user'
+          type: array
+      required:
+      - sys_users
+      title: sys-users-list-response
+      type: object
+      x-go-name: SysUsersListResponseBody
+    sys-users-update-request:
+      description: Request to update information of the system user.
+      properties:
+        display_name:
+          description: Updated display name for the system user.
+          type: string
+        display_picture:
+          description: Artifact ID of the system user's new display picture.
+          example: don:<partition>:core:devo/<dev-org-id>:artifact/<artifact-id>
+          nullable: true
+          type: string
+        full_name:
+          description: Updated full name for the system user.
+          type: string
+        id:
+          description: The ID of system user to update.
+          type: string
+      required:
+      - id
+      title: sys-users-update-request
+      type: object
+    sys-users-update-response:
+      description: Updated Sys user object.
+      properties:
+        sys_user:
+          $ref: '#/components/schemas/sys-user'
+      required:
+      - sys_user
+      title: sys-users-update-response
+      type: object
+      x-go-name: SysUsersUpdateResponseBody
+    ticket-severity:
+      description: Severity of the ticket.
+      enum:
+      - blocker
+      - high
+      - low
+      - medium
+      type: string
+    ticket-summary:
+      allOf:
+      - $ref: '#/components/schemas/work-base-summary'
+      - properties:
+          rev_org:
+            $ref: '#/components/schemas/org-summary'
+          severity:
+            $ref: '#/components/schemas/ticket-severity'
+        type: object
+      title: ticket-summary
+    timeline-comment:
+      allOf:
+      - $ref: '#/components/schemas/timeline-entry-base'
+      - properties:
+          artifacts:
+            description: The artifacts for the comment.
+            items:
+              $ref: '#/components/schemas/artifact-summary'
+            type: array
+          body:
+            description: |
+              The comment's body. If the comment has been deleted, then no body
+              will appear in the response.
+            type: string
+          body_type:
+            $ref: '#/components/schemas/timeline-comment-body-type'
+          snap_kit_body:
+            description: The SnapKit Body of the comment.
+            type: object
+        type: object
+      title: timeline-comment
+    timeline-comment-body-type:
+      description: The type of the body to use for the comment.
+      enum:
+      - snap_kit
+      - text
+      type: string
+    timeline-entry:
+      discriminator:
+        mapping:
+          timeline_comment: '#/components/schemas/timeline-comment'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/timeline-comment'
+      properties:
+        type:
+          $ref: '#/components/schemas/timeline-entry-type'
+      required:
+      - type
+      title: timeline-entry
+      type: object
+    timeline-entry-base:
+      allOf:
+      - $ref: '#/components/schemas/atom-base'
+      title: timeline-entry-base
+    timeline-entry-type:
+      enum:
+      - timeline_comment
+      type: string
+    unlink-rev-user-from-rev-org-request:
+      description: A request to unlink a rev user from a rev org.
+      properties:
+        rev_org_don:
+          description: The don of the rev org to unlink the rev user from.
+          example: don:<partition>:identity:devo/<dev-org-id>:revo/<rev-org-id>
+          type: string
+        user_don:
+          description: The don of the rev user to unlink.
+          type: string
+      required:
+      - rev_org_don
+      - user_don
+      title: unlink-rev-user-from-rev-org-request
+      type: object
+    unlink-rev-user-from-rev-org-response:
+      description: The response to unlink a rev user from a rev org.
+      properties:
+        rev_user:
+          $ref: '#/components/schemas/rev-user'
+      required:
+      - rev_user
+      title: unlink-rev-user-from-rev-org-response
+      type: object
+      x-go-name: UnlinkRevUserFromRevOrgResponseBody
+    user-base:
+      allOf:
+      - $ref: '#/components/schemas/atom-base'
+      - properties:
+          display_name:
+            description: |
+              The user's display name. The name is non-unique and mutable.
+            type: string
+          display_picture:
+            $ref: '#/components/schemas/artifact-summary'
+          email:
+            description: Email address of the user.
+            type: string
+          full_name:
+            description: Full name of the user.
+            type: string
+          phone_numbers:
+            description: Phone numbers of the user.
+            items:
+              type: string
+            type: array
+          state:
+            $ref: '#/components/schemas/user-state'
+        type: object
+      title: user-base
+    user-base-summary:
+      allOf:
+      - $ref: '#/components/schemas/atom-base-summary'
+      - properties:
+          display_name:
+            description: |
+              The user's display name. The name is non-unique and mutable.
+            type: string
+          display_picture:
+            $ref: '#/components/schemas/artifact-summary'
+          email:
+            description: Email address of the user.
+            type: string
+          full_name:
+            description: Full name of the user.
+            type: string
+          state:
+            $ref: '#/components/schemas/user-state'
+        type: object
+      title: user-base-summary
+    user-state:
+      description: State of the user.
+      enum:
+      - active
+      - deactivated
+      - locked
+      - shadow
+      - unassigned
+      type: string
+    user-summary:
+      discriminator:
+        mapping:
+          dev_user: '#/components/schemas/dev-user-summary'
+          rev_user: '#/components/schemas/rev-user-summary'
+          sys_user: '#/components/schemas/sys-user-summary'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/dev-user-summary'
+      - $ref: '#/components/schemas/rev-user-summary'
+      - $ref: '#/components/schemas/sys-user-summary'
+      properties:
+        type:
+          $ref: '#/components/schemas/user-type'
+      required:
+      - type
+      title: user-summary
+      type: object
+    user-type:
+      enum:
+      - dev_user
+      - rev_user
+      - sys_user
+      type: string
+    work-base-summary:
+      allOf:
+      - $ref: '#/components/schemas/atom-base-summary'
+      - properties:
+          title:
+            description: Title of the work object.
+            type: string
+        required:
+        - title
+        type: object
+      title: work-base-summary
+  securitySchemes:
+    auth-token:
+      description: |-
+        All the DevRev APIs require a token to authenticate the user. Provide `Authorization: <token>` as a header to every API request.
+         [How do I find my token?](https://devrev.ai/docs/apis/auth)
+      in: header
+      name: Authorization
+      type: apiKey
+info:
+  description: DevRev's BETA REST API Specification.
+  title: DevRev Beta REST API
+  version: BETA
+openapi: 3.0.3
+paths:
+  /conversations.create:
+    post:
+      description: Creates a conversation.
+      operationId: conversations-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/conversations-create-request'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conversations-create-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - conversations
+  /conversations.delete:
+    post:
+      description: Deletes the requested conversation.
+      operationId: conversations-delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/conversations-delete-request'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conversations-delete-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - conversations
+  /conversations.export:
+    get:
+      description: Exports a collection of conversation items.
+      operationId: conversations-export
+      parameters:
+      - description: |
+          Filters for conversations belonging to any of the provided parts.
+        explode: false
+        in: query
+        name: applies_to_parts
+        schema:
+          example:
+          - don:<partition>:core:devo/<dev-org-id>:<part-type>/<part-id>
+          items:
+            type: string
+          type: array
+      - description: |
+          The number of conversation items to return. The default is '50', the
+          maximum is '5000'.
+        explode: false
+        in: query
+        name: first
+        schema:
+          format: int32
+          type: integer
+      - description: |
+          Filters for conversations where these users are participants.
+        explode: false
+        in: query
+        name: members
+        schema:
+          example:
+          - don:<partition>:identity:devo/<dev-org-id>:devu/<dev-user-id>
+          items:
+            type: string
+          type: array
+      - description: Filters for conversations owned by any of these users.
+        explode: false
+        in: query
+        name: owned_by
+        schema:
+          example:
+          - don:<partition>:identity:devo/<dev-org-id>:devu/<dev-user-id>
+          items:
+            type: string
+          type: array
+      - description: |
+          Filters for conversations that are associated with any of the
+          provided Rev organizations.
+        explode: false
+        in: query
+        name: rev_org
+        schema:
+          example:
+          - don:<partition>:identity:devo/<dev-org-id>:revo/<rev-org-id>
+          items:
+            type: string
+          type: array
+      - description: |
+          Filters for conversations with any of the provided source channels.
+        explode: false
+        in: query
+        name: source_channels
+        schema:
+          items:
+            type: string
+          type: array
+      - description: Filters for records in the provided stage(s).
+        explode: false
+        in: query
+        name: stage.name
+        schema:
+          items:
+            type: string
+          type: array
+      - description: Filters for conversations with any of the provided tags.
+        explode: false
+        in: query
+        name: tags
+        schema:
+          example:
+          - don:<partition>:core:devo/<dev-org-id>:tag/<tag-id>
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conversations-export-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - conversations
+  /conversations.get:
+    get:
+      description: Gets the requested conversation's information.
+      operationId: conversations-get
+      parameters:
+      - description: The requested conversation's ID.
+        explode: false
+        in: query
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conversations-get-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - conversations
+  /conversations.list:
+    get:
+      description: Lists the available conversations.
+      operationId: conversations-list
+      parameters:
+      - description: |
+          Filters for conversations belonging to any of the provided parts.
+        explode: false
+        in: query
+        name: applies_to_parts
+        schema:
+          example:
+          - don:<partition>:core:devo/<dev-org-id>:<part-type>/<part-id>
+          items:
+            type: string
+          type: array
+      - description: |
+          The cursor to resume iteration from. If not provided, then iteration
+          starts from the beginning.
+        explode: false
+        in: query
+        name: cursor
+        schema:
+          type: string
+      - description: |
+          The maximum number of conversations to return. The default is '50'.
+        explode: false
+        in: query
+        name: limit
+        schema:
+          format: int32
+          type: integer
+      - description: |
+          Filters for conversations where these users are participants.
+        explode: false
+        in: query
+        name: members
+        schema:
+          example:
+          - don:<partition>:identity:devo/<dev-org-id>:devu/<dev-user-id>
+          items:
+            type: string
+          type: array
+      - description: |
+          The iteration mode to use, otherwise if not set, then "after" is
+          used.
+        explode: false
+        in: query
+        name: mode
+        schema:
+          $ref: '#/components/schemas/list-mode'
+      - description: Filters for conversations owned by any of these users.
+        explode: false
+        in: query
+        name: owned_by
+        schema:
+          example:
+          - don:<partition>:identity:devo/<dev-org-id>:devu/<dev-user-id>
+          items:
+            type: string
+          type: array
+      - description: |
+          Filters for conversations that are associated with any of the
+          provided Rev organizations.
+        explode: false
+        in: query
+        name: rev_org
+        schema:
+          example:
+          - don:<partition>:identity:devo/<dev-org-id>:revo/<rev-org-id>
+          items:
+            type: string
+          type: array
+      - description: |
+          Filters for conversations with any of the provided source channels.
+        explode: false
+        in: query
+        name: source_channels
+        schema:
+          items:
+            type: string
+          type: array
+      - description: Filters for records in the provided stage(s).
+        explode: false
+        in: query
+        name: stage.name
+        schema:
+          items:
+            type: string
+          type: array
+      - description: Filters for conversations with any of the provided tags.
+        explode: false
+        in: query
+        name: tags
+        schema:
+          example:
+          - don:<partition>:core:devo/<dev-org-id>:tag/<tag-id>
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conversations-list-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - conversations
+  /conversations.update:
+    post:
+      description: Updates the requested conversation.
+      operationId: conversations-update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/conversations-update-request'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conversations-update-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - conversations
+  /links.create:
+    post:
+      description: |
+        Creates a link between two objects to indicate a relationship.
+      operationId: links-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/links-create-request'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/links-create-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - links
+  /links.delete:
+    post:
+      description: Deletes a link.
+      operationId: links-delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/links-delete-request'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/links-delete-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - links
+  /links.get:
+    get:
+      description: Gets the requested link's information.
+      operationId: links-get
+      parameters:
+      - description: The requested link's ID.
+        explode: false
+        in: query
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/links-get-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - links
+  /links.list:
+    get:
+      description: Lists the available links.
+      operationId: links-list
+      parameters:
+      - description: The ID of the object to list the links for.
+        explode: false
+        in: query
+        name: object
+        required: true
+        schema:
+          type: string
+      - description: |
+          The cursor to resume iteration from. If not provided, then iteration
+          starts from the beginning.
+        explode: false
+        in: query
+        name: cursor
+        schema:
+          type: string
+      - description: |
+          The direction of the links to list, otherwise if not present, then
+          links in both directions (source and target) are included.
+        explode: false
+        in: query
+        name: direction
+        schema:
+          $ref: '#/components/schemas/links-direction'
+      - description: |
+          The maximum number of links to return. If not set, then the default
+          is '50'.
+        explode: false
+        in: query
+        name: limit
+        schema:
+          format: int32
+          type: integer
+      - description: |
+          The link type(s) to filter for, otherwise if not present, all link
+          types are included.
+        explode: false
+        in: query
+        name: link_type
+        schema:
+          items:
+            $ref: '#/components/schemas/link-type'
+          type: array
+      - description: |
+          The iteration mode to use, otherwise if not set, then "after" is
+          used.
+        explode: false
+        in: query
+        name: mode
+        schema:
+          $ref: '#/components/schemas/list-mode'
+      - description: |
+          The link types to filter for, otherwise if not present, all link
+          types are included.
+        explode: false
+        in: query
+        name: types
+        schema:
+          deprecated: true
+          items:
+            $ref: '#/components/schemas/link-type'
+          type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/links-list-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - links
+  /rev-users.create:
+    post:
+      description: |
+        Creates a Rev user for a Rev organization. Rev user can be a customer
+        or a lead of an organization.
+      operationId: rev-users-create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/rev-users-create-request'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rev-users-create-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - rev-users
+  /rev-users.delete:
+    post:
+      description: Deletes a Rev user.
+      operationId: rev-users-delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/rev-users-delete-request'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rev-users-delete-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - rev-users
+  /rev-users.get:
+    get:
+      description: Returns the Rev user of a Rev organization by its ID.
+      operationId: rev-users-get
+      parameters:
+      - description: The ID of Rev user to be retrieved.
+        explode: false
+        in: query
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rev-users-get-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - rev-users
+  /rev-users.link:
+    post:
+      description: Links a rev user to a rev org.
+      operationId: link-rev-user-to-rev-org
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/link-rev-user-to-rev-org-request'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/link-rev-user-to-rev-org-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - rev-users
+  /rev-users.list:
+    get:
+      description: |
+        Returns a list of all Rev Users belonging to the authenticated user's
+        Dev Organization.
+      operationId: rev-users-list
+      parameters:
+      - description: |
+          Filters for Rev users that were created by the specified user(s).
+        explode: false
+        in: query
+        name: created_by
+        schema:
+          items:
+            type: string
+          type: array
+      - description: |
+          Filters for objects created after the provided timestamp (inclusive).
+        explode: false
+        in: query
+        name: created_date.after
+        schema:
+          format: date-time
+          type: string
+      - description: |
+          Filters for objects created before the provided timestamp
+          (inclusive).
+        explode: false
+        in: query
+        name: created_date.before
+        schema:
+          format: date-time
+          type: string
+      - description: |
+          The cursor to resume iteration from. If not provided, then iteration
+          starts from the beginning.
+        explode: false
+        in: query
+        name: cursor
+        schema:
+          type: string
+      - description: List of emails of Rev users to be filtered.
+        explode: false
+        in: query
+        name: email
+        schema:
+          items:
+            type: string
+          type: array
+      - description: |
+          The maximum number of Rev users to return. The default is '50'.
+        explode: false
+        in: query
+        name: limit
+        schema:
+          format: int32
+          type: integer
+      - description: |
+          The iteration mode to use, otherwise if not set, then "after" is
+          used.
+        explode: false
+        in: query
+        name: mode
+        schema:
+          $ref: '#/components/schemas/list-mode'
+      - description: |
+          Filters for objects created after the provided timestamp (inclusive).
+        explode: false
+        in: query
+        name: modified_date.after
+        schema:
+          format: date-time
+          type: string
+      - description: |
+          Filters for objects created before the provided timestamp
+          (inclusive).
+        explode: false
+        in: query
+        name: modified_date.before
+        schema:
+          format: date-time
+          type: string
+      - description: List of IDs of Rev organizations to be filtered.
+        explode: false
+        in: query
+        name: rev_org
+        schema:
+          example:
+          - don:<partition>:identity:devo/<dev-org-id>:revo/<rev-org-id>
+          items:
+            type: string
+          type: array
+      - description: |
+          Fields to sort the Rev users by and the direction to sort them.
+        explode: false
+        in: query
+        name: sort_by
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rev-users-list-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - rev-users
+  /rev-users.unlink:
+    post:
+      description: Unlinks a rev user from a rev org.
+      operationId: unlink-rev-user-from-rev-org
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/unlink-rev-user-from-rev-org-request'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unlink-rev-user-from-rev-org-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - rev-users
+  /rev-users.update:
+    post:
+      description: Updates a Rev user.
+      operationId: rev-users-update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/rev-users-update-request'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rev-users-update-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - rev-users
+  /sys-users.list:
+    get:
+      description: Lists system users within your organization.
+      operationId: sys-users-list
+      parameters:
+      - description: |
+          The cursor to resume iteration from. If not provided, then iteration
+          starts from the beginning.
+        explode: false
+        in: query
+        name: cursor
+        schema:
+          type: string
+      - description: |
+          The maximum number of system users to return. Value can range from
+          '1' to '100', with a default of '50'.
+        explode: false
+        in: query
+        name: limit
+        schema:
+          format: int32
+          type: integer
+      - description: |
+          The iteration mode to use, otherwise if not set, then "after" is
+          used.
+        explode: false
+        in: query
+        name: mode
+        schema:
+          $ref: '#/components/schemas/list-mode'
+      - description: |
+          Fields to sort the system users by and the direction to sort them.
+        explode: false
+        in: query
+        name: sort_by
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sys-users-list-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - sys-users
+  /sys-users.update:
+    post:
+      description: Updates the system user.
+      operationId: sys-users-update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/sys-users-update-request'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sys-users-update-response'
+          description: Success.
+        "400":
+          $ref: '#/components/responses/bad-request'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "404":
+          $ref: '#/components/responses/not-found'
+        "429":
+          $ref: '#/components/responses/too-many-requests'
+        "500":
+          $ref: '#/components/responses/internal-server-error'
+        "503":
+          $ref: '#/components/responses/service-unavailable'
+      tags:
+      - sys-users
+security:
+- auth-token: []
+servers:
+- description: DevRev API endpoint.
+  url: '{protocol}://{hostname}'
+  variables:
+    hostname:
+      default: api.devrev.ai
+      description: API hostname.
+    protocol:
+      default: https
+      description: API protocol.
+tags:
+- description: DevRev conversation interaction.
+  name: conversations
+- description: DevRev link interactions.
+  name: links
+- description: Rev user interactions.
+  name: rev-users
+- description: System user interactions
+  name: sys-users
