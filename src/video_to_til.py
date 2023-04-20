@@ -6,7 +6,6 @@ from datetime import date
 import requests
 from requests.exceptions import HTTPError
 from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api.formatters import JSONFormatter
 from youtube_transcript_api.formatters import TextFormatter
 
 # Set WWCODE_API_WORKSHOP_PAT in you .env
@@ -23,14 +22,14 @@ base_url = "https://api.devrev.ai"
 # of the video is provided.
 # Reference: https://pypi.org/project/youtube-transcript-api/
 
+def textlen(s):
+    return len(s.encode('utf-8'))
+
 def fetch_transcription(id):
     transcript = YouTubeTranscriptApi.get_transcript(
         id, preserve_formatting=True)
     tformatter = TextFormatter()
     finalText = tformatter.format_transcript(transcript)
-    print(finalText)
-    with open('til.txt', 'w') as f:
-        f.write(finalText)
     return finalText
 
 # Lists the Devrev parts in order to pick a part to assign the issue to.
@@ -119,7 +118,6 @@ def create_works():
 
 def create_comment(work_id, til):
     url = base_url + "/timeline-entries.create"
-    print(til)
     payload = json.dumps({
         "object": work_id,
         "type": "timeline_comment",
@@ -144,21 +142,26 @@ def main():
         return
     vid_list = str(sys.argv[1])
     vid_link = "https://www.youtube.com/watch?v=" + vid_list
-    print(vid_link)
     part_id = list_parts()
     if not part_id:
         print(" Cannot find Part[Learning Logs]")
         return
     work_id = list_works(part_id)
-    print(work_id)
+    print("The work item updated is: " + work_id)
     if work_id == "":
         work_id = create_works()
         print("created " + work_id)
     today = date.today()
     datestr = today.strftime("%m/%d/%y")
     til = datestr + "\n" + " Original Video: " + vid_link + "\n" + fetch_transcription(vid_list)
+    til_len = textlen(til)
+    # Devrev limits posts to 16 KB
+    if til_len > 16383:
+        print("Size of text in bytes ", til_len)
+        print("Truncating string, since Devrev limits posts to 16KB")
+        til = til.encode('utf-8')[:16383].decode('utf-8', 'ignore')
     create_comment(work_id, til)
 
-
+16384
 if __name__ == "__main__":
     main()
